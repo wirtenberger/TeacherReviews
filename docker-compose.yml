@@ -1,0 +1,28 @@
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./TeacherReviews.API/Dockerfile
+    volumes:
+      - ./:/home/xe/Coding/csharp/TeachersReviews
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+
+  db:
+    restart: always
+    image: postgres:latest
+    container_name: db
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: TeachersReviews
