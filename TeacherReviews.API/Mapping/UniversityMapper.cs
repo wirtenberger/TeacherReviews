@@ -1,6 +1,6 @@
 ﻿using TeacherReviews.API.Contracts.Requests.University;
-using TeacherReviews.Data.DTO;
-using TeacherReviews.Data.Entities;
+using TeacherReviews.Domain.DTO;
+using TeacherReviews.Domain.Entities;
 
 namespace TeacherReviews.API.Mapping;
 
@@ -13,7 +13,7 @@ public static class UniversityMapper
             Id = Guid.NewGuid().ToString(),
             Name = createUniversityRequest.Name,
             Abbreviation = createUniversityRequest.Abbreviation,
-            CityId = createUniversityRequest.CityId
+            CityId = createUniversityRequest.CityId,
         };
     }
 
@@ -24,7 +24,7 @@ public static class UniversityMapper
             Id = updateUniversityRequest.Id,
             Name = updateUniversityRequest.Name!,
             Abbreviation = updateUniversityRequest.Abbreviation!,
-            CityId = updateUniversityRequest.CityId!
+            CityId = updateUniversityRequest.CityId!,
         };
     }
 
@@ -35,7 +35,7 @@ public static class UniversityMapper
             Id = university.Id,
             Name = university.Name,
             Abbreviation = university.Abbreviation,
-            CityId = university.CityId
+            CityId = university.CityId,
         };
     }
 }

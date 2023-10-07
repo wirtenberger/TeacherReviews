@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using TeacherReviews.API.Contracts.Repositories;
 using TeacherReviews.API.Repositories;
-using TeacherReviews.Data;
-using TeacherReviews.Data.Entities;
-using TeacherReviews.Data.Exceptions;
+using TeacherReviews.Domain;
+using TeacherReviews.Domain.Entities;
+using TeacherReviews.Domain.Exceptions;
 
 namespace TeacherReviews.API.Services;
 

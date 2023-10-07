@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TeacherReviews.Data.Entities;
+using TeacherReviews.Domain.Entities;
 
-namespace TeacherReviews.Data;
+namespace TeacherReviews.Domain;
 
 public class ApplicationDbContext : DbContext
 {

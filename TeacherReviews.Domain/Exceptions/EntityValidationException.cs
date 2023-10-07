@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace TeacherReviews.Data.Exceptions;
+namespace TeacherReviews.Domain.Exceptions;
 
 public class EntityValidationException : BaseApiException
 {

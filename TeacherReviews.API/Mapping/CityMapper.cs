@@ -1,6 +1,6 @@
 ﻿using TeacherReviews.API.Contracts.Requests.City;
-using TeacherReviews.Data.DTO;
-using TeacherReviews.Data.Entities;
+using TeacherReviews.Domain.DTO;
+using TeacherReviews.Domain.Entities;
 
 namespace TeacherReviews.API.Mapping;
 
@@ -11,7 +11,7 @@ public static class CityMapper
         return new City
         {
             Id = Guid.NewGuid().ToString(),
-            Name = createCityRequest.Name
+            Name = createCityRequest.Name,
         };
     }
 
@@ -20,7 +20,7 @@ public static class CityMapper
         return new City
         {
             Id = updateCityRequest.Id,
-            Name = updateCityRequest.Name!
+            Name = updateCityRequest.Name!,
         };
     }
 
@@ -29,7 +29,7 @@ public static class CityMapper
         return new CityDto
         {
             Id = city.Id,
-            Name = city.Name
+            Name = city.Name,
         };
     }
 }

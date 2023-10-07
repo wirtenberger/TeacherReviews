@@ -1,4 +1,4 @@
-﻿using TeacherReviews.Data;
+﻿using TeacherReviews.Domain;
 
 namespace TeacherReviews.API.Middlewares;
 

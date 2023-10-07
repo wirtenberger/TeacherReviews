@@ -1,4 +1,4 @@
-﻿namespace TeacherReviews.Data.Entities;
+﻿namespace TeacherReviews.Domain.Entities;
 
 public class Review
 {

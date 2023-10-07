@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TeacherReviews.API.Contracts.Repositories;
-using TeacherReviews.Data;
-using TeacherReviews.Data.Entities;
+using TeacherReviews.Domain;
+using TeacherReviews.Domain.Entities;
 
 namespace TeacherReviews.API.Repositories;
 

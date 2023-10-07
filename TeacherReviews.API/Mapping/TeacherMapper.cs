@@ -1,6 +1,6 @@
 ﻿using TeacherReviews.API.Contracts.Requests.Teacher;
-using TeacherReviews.Data.DTO;
-using TeacherReviews.Data.Entities;
+using TeacherReviews.Domain.DTO;
+using TeacherReviews.Domain.Entities;
 
 namespace TeacherReviews.API.Mapping;
 
@@ -14,7 +14,7 @@ public static class TeacherMapper
             Name = teacher.Name,
             Surname = teacher.Surname,
             Patronymic = teacher.Patronymic,
-            UniversityId = teacher.UniversityId
+            UniversityId = teacher.UniversityId,
         };
     }
 
@@ -26,7 +26,7 @@ public static class TeacherMapper
             Name = createTeacherRequest.Name,
             Surname = createTeacherRequest.Surname,
             Patronymic = createTeacherRequest.Patronymic,
-            UniversityId = createTeacherRequest.UniversityId
+            UniversityId = createTeacherRequest.UniversityId,
         };
     }
 
@@ -38,7 +38,7 @@ public static class TeacherMapper
             Name = updateTeacherRequest.Name!,
             Surname = updateTeacherRequest.Surname!,
             Patronymic = updateTeacherRequest.Patronymic,
-            UniversityId = updateTeacherRequest.UniversityId
+            UniversityId = updateTeacherRequest.UniversityId,
         };
     }
 }

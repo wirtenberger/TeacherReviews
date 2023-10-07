@@ -54,7 +54,7 @@ public class CityController : ControllerBase
     }
 
     [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteCity([FromBody] DeleteCityRequest deleteCityRequest)
+    public async Task<IActionResult> DeleteCity([FromQuery] DeleteCityRequest deleteCityRequest)
     {
         var deletedCity = await _cityService.DeleteAsync(
             deleteCityRequest.Id

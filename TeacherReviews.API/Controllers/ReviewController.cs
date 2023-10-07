@@ -28,7 +28,7 @@ public class ReviewController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateReviewRequest createTeacherRequest)
     {
         return Ok(
-            (await _reviewService.AddAsync(createTeacherRequest.ToReview())).ToDto()
+            (await _reviewService.Create(createTeacherRequest.ToReview())).ToDto()
         );
     }
 

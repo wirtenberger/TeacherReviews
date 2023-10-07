@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace TeacherReviews.Data.Exceptions;
+namespace TeacherReviews.Domain.Exceptions;
 
 public class EntityExistsException : BaseApiException
 {

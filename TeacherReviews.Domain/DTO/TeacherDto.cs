@@ -1,4 +1,4 @@
-﻿namespace TeacherReviews.Data.DTO;
+﻿namespace TeacherReviews.Domain.DTO;
 
 public class TeacherDto
 {

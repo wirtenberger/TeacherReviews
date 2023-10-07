@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 
-namespace TeacherReviews.Data.Exceptions;
+namespace TeacherReviews.Domain.Exceptions;
 
 public class BaseApiException : Exception
 {
@@ -9,7 +9,7 @@ public class BaseApiException : Exception
 
     protected BaseApiException(int statusCode, string description) : this(
         statusCode,
-        new List<string> {description}
+        new List<string> { description }
     )
     {
     }
@@ -30,6 +30,6 @@ public class BaseApiException : Exception
 
     public string Serialize()
     {
-        return JsonSerializer.Serialize(new {code = StatusCode, description = Errors});
+        return JsonSerializer.Serialize(new { code = StatusCode, description = Errors });
     }
 }

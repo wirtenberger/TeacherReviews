@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using TeacherReviews.Data.Entities;
+using TeacherReviews.Domain.Entities;
 
 namespace TeacherReviews.API.Contracts.Repositories;
 

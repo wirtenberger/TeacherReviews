@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using TeacherReviews.API.Contracts.Repositories;
-using TeacherReviews.Data.Entities;
-using TeacherReviews.Data.Exceptions;
+using TeacherReviews.Domain.Entities;
+using TeacherReviews.Domain.Exceptions;
 
 namespace TeacherReviews.API.Services;
 
@@ -13,7 +13,7 @@ public class TeacherService
     private readonly IUniversityRepository _universityRepository;
 
     public TeacherService(ITeacherRepository teacherRepository, IUniversityRepository universityRepository,
-        IReviewRepository reviewRepository, UnitOfWork unitOfWork)
+                          IReviewRepository reviewRepository, UnitOfWork unitOfWork)
     {
         _teacherRepository = teacherRepository;
         _universityRepository = universityRepository;
@@ -37,7 +37,7 @@ public class TeacherService
         return _teacherRepository.GetAllAsync(filter);
     }
 
-    public async Task<Teacher> AddAsync(Teacher item)
+    public async Task<Teacher> Create(Teacher item)
     {
         if (!await _universityRepository.ExistsAsync(item.UniversityId))
         {

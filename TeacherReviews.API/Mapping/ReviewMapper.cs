@@ -1,6 +1,6 @@
 ﻿using TeacherReviews.API.Contracts.Requests.Review;
-using TeacherReviews.Data.DTO;
-using TeacherReviews.Data.Entities;
+using TeacherReviews.Domain.DTO;
+using TeacherReviews.Domain.Entities;
 
 namespace TeacherReviews.API.Mapping;
 
@@ -14,7 +14,7 @@ public static class ReviewMapper
             Rate = createReviewRequest.Rate,
             Text = createReviewRequest.Text,
             CreateDate = DateOnly.FromDateTime(DateTime.Now),
-            TeacherId = createReviewRequest.TeacherId
+            TeacherId = createReviewRequest.TeacherId,
         };
     }
 
@@ -26,7 +26,7 @@ public static class ReviewMapper
             Rate = review.Rate,
             Text = review.Text,
             CreateDate = review.CreateDate,
-            TeacherId = review.TeacherId
+            TeacherId = review.TeacherId,
         };
     }
 }
