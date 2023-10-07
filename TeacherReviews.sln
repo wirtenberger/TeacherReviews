@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeacherReviews.API", "Teach
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeacherReviews.Domain", "TeacherReviews.Domain\TeacherReviews.Domain.csproj", "{5DE5F972-8F06-4273-AF60-4F936319E3E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeacherReviews.API.Tests", "TeacherReviews.API.Tests\TeacherReviews.API.Tests.csproj", "{BAFEB5AC-063F-474F-8A21-0D3A43A41A92}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5DE5F972-8F06-4273-AF60-4F936319E3E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DE5F972-8F06-4273-AF60-4F936319E3E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DE5F972-8F06-4273-AF60-4F936319E3E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAFEB5AC-063F-474F-8A21-0D3A43A41A92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAFEB5AC-063F-474F-8A21-0D3A43A41A92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAFEB5AC-063F-474F-8A21-0D3A43A41A92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAFEB5AC-063F-474F-8A21-0D3A43A41A92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
