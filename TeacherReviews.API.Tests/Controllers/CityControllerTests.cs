@@ -211,13 +211,11 @@ public class CityControllerTests
         var city = _cityFaker.Generate();
         await _cityService.CreateAsync(city);
 
-        var list = new List<UniversityDto>();
+        var list = _universityFaker.Generate(3);
 
-        for (var i = 0; i < 3; i++)
+        foreach(var university in list)
         {
-            var university = _universityFaker.Generate();
             university.CityId = city.Id;
-            list.Add(university.ToDto());
             await _universityService.CreateAsync(university);
         }
 
@@ -228,7 +226,7 @@ public class CityControllerTests
         var universitiesDtoList = JsonSerializer.Deserialize<List<UniversityDto>>(responseString, JsonDefaultOptions.DeserializeOptions)!;
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equivalent(list, universitiesDtoList);
+        Assert.Equivalent(list.Select(u => u.ToDto()).ToList(), universitiesDtoList);
     }
 
     [Fact]

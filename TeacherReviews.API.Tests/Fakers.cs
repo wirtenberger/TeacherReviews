@@ -15,4 +15,10 @@ public static class Fakers
                                                        .RuleFor(u => u.Id, _ => Guid.NewGuid().ToString())
                                                        .RuleFor(u => u.Name, faker => faker.Address.City() + "University")
                                                        .RuleFor(u => u.Abbreviation, faker => faker.Random.String2(3, 4));
+
+    public static Faker<Teacher> TeacherFaker => new Faker<Teacher>()
+                                                 .RuleFor(t => t.Id, _ => Guid.NewGuid().ToString())
+                                                 .RuleFor(t => t.Name, faker => faker.Name.FirstName())
+                                                 .RuleFor(t => t.Surname, faker => faker.Name.LastName())
+                                                 .RuleFor(t => t.Patronymic, faker => faker.Name.Random.String2(4, 8));
 }
