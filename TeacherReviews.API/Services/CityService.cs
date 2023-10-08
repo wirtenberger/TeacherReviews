@@ -66,6 +66,11 @@ public class CityService
 
     public async Task<City> UpdateAsync(City item)
     {
+        if (!await _cityRepository.ExistsAsync(item.Id))
+        {
+            throw new EntityNotFoundException(typeof(City), item.Id);
+        }
+
         if ((await _cityRepository.GetAllAsync(c => c.Name == item.Name)).Any())
         {
             throw new EntityExistsException(typeof(City), nameof(City.Name), item.Name);
@@ -78,8 +83,13 @@ public class CityService
         return city;
     }
 
-    public Task<IEnumerable<University>> GetCitysUniversitiesAsync(string id)
+    public async Task<IEnumerable<University>> GetCitysUniversitiesAsync(string id)
     {
-        return _universityRepository.GetAllAsync(u => u.CityId == id);
+        if (!await _cityRepository.ExistsAsync(id))
+        {
+            throw new EntityNotFoundException(typeof(City), id);
+        }
+
+        return await _universityRepository.GetAllAsync(u => u.CityId == id);
     }
 }
