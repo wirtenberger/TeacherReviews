@@ -36,7 +36,7 @@ public class UniversityService
         return _universityRepository.GetAllAsync(filter);
     }
 
-    public async Task<University> Create(University item)
+    public async Task<University> CreateAsync(University item)
     {
         if (!await _cityRepository.ExistsAsync(item.CityId))
         {

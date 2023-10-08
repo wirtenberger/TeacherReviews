@@ -40,7 +40,7 @@ public class UniversityController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateUniversity([FromBody] CreateUniversityRequest createUniversityRequest)
     {
-        var createdUniversity = await _universityService.Create(
+        var createdUniversity = await _universityService.CreateAsync(
             createUniversityRequest.ToUniversity()
         );
 

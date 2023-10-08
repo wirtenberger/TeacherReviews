@@ -40,7 +40,7 @@ public class TeacherController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateTeacher([FromBody] CreateTeacherRequest createTeacherRequest)
     {
-        var createdTeacher = await _teacherService.Create(
+        var createdTeacher = await _teacherService.CreateAsync(
             createTeacherRequest.ToTeacher()
         );
 

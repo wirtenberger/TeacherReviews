@@ -37,7 +37,7 @@ public class TeacherService
         return _teacherRepository.GetAllAsync(filter);
     }
 
-    public async Task<Teacher> Create(Teacher item)
+    public async Task<Teacher> CreateAsync(Teacher item)
     {
         if (!await _universityRepository.ExistsAsync(item.UniversityId))
         {
