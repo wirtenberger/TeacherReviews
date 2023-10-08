@@ -15,7 +15,7 @@ public class EntityValidationException : BaseApiException
     {
     }
 
-    private static string SerializeErrors(ModelStateDictionary modelStateDictionary)
+    private static List<string> SerializeErrors(ModelStateDictionary modelStateDictionary)
     {
         List<string> errors = new();
         foreach (var (_, value) in modelStateDictionary)
@@ -23,6 +23,6 @@ public class EntityValidationException : BaseApiException
             errors.AddRange(value.Errors.Select(error => error.ErrorMessage));
         }
 
-        return JsonSerializer.Serialize(errors);
+        return errors;
     }
 }
