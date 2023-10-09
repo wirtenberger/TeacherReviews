@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace TeacherReviews.Domain.Exceptions;
 
@@ -28,8 +27,12 @@ public class BaseApiException : Exception
 
     public int StatusCode { get; set; }
 
-    public string Serialize()
+    public ExceptionResponse AsExceptionResponse()
     {
-        return JsonSerializer.Serialize(new { code = StatusCode, description = Errors });
+        return new ExceptionResponse
+        {
+            StatusCode = StatusCode,
+            Errors = Errors,
+        };
     }
 }

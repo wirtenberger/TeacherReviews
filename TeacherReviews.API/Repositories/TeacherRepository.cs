@@ -19,8 +19,8 @@ public class TeacherRepository : ITeacherRepository
 
     public async Task<Teacher> DeleteAsync(string id)
     {
-        var teacher = await GetByIdAsync(id);
-        TeachersSet.Remove(teacher);
+        var teacher = (await GetByIdAsync(id))!;
+        TeachersSet.Remove(teacher!);
         return teacher;
     }
 

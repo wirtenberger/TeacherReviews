@@ -29,7 +29,7 @@ public class Program
         {
             options.InvalidModelStateResponseFactory = context =>
                 new BadRequestObjectResult(
-                    new EntityValidationException(context.ModelState).Serialize()
+                    new EntityValidationException(context.ModelState).AsExceptionResponse()
                 );
         });
 

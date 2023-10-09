@@ -31,7 +31,7 @@ public class ApplicationFactory : WebApplicationFactory<Program>
                 d => d.ServiceType ==
                      typeof(DbContextOptions<ApplicationDbContext>));
 
-            services.Remove(dbContextDescriptor);
+            services.Remove(dbContextDescriptor!);
 
             services.AddDbContext<ApplicationDbContext>(opts =>
             {

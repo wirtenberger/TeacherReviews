@@ -3,7 +3,7 @@
 public class Review
 {
     [Required]
-    public string Id { get; set; }
+    public string Id { get; set; } = default!;
 
     [Required]
     [Range(1, 5)]
@@ -18,5 +18,5 @@ public class Review
     public string TeacherId { get; set; } = default!;
 
     [ForeignKey(nameof(TeacherId))]
-    public virtual Teacher Teacher { get; set; }
+    public virtual Teacher? Teacher { get; set; }
 }

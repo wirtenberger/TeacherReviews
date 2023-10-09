@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using System.Text.Json;
 using Bogus;
@@ -17,13 +16,13 @@ public class CityControllerTests
 {
     private readonly ApplicationFactory _applicationFactory;
 
-    private readonly CityService _cityService;
-
-    private readonly UniversityService _universityService;
-
     private readonly Faker<City> _cityFaker = Fakers.CityFaker;
 
+    private readonly CityService _cityService;
+
     private readonly Faker<University> _universityFaker = Fakers.UniversityFaker;
+
+    private readonly UniversityService _universityService;
 
     public CityControllerTests()
     {
@@ -53,15 +52,18 @@ public class CityControllerTests
     [Fact]
     public async Task GetCityById_ReturnsBadRequest_WhenNotExists()
     {
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.GetAsync("api/City/get?id=NotExistingId");
+        var response = await httpClient.GetAsync($"api/City/get?id={id}");
         var responseString = await response.Content.ReadAsStringAsync();
 
-        var exception = new EntityNotFoundException(typeof(City), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -78,7 +80,7 @@ public class CityControllerTests
         );
 
         var responseString = await response.Content.ReadAsStringAsync();
-        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(city.Name, cityDto.Name);
@@ -88,8 +90,8 @@ public class CityControllerTests
     public async Task Create_ReturnsBadRequest_WhenCityWithSuchNameExists()
     {
         var city = _cityFaker.Generate();
-
         await _cityService.CreateAsync(city);
+        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), city.Name).Serialize();
 
         var httpClient = _applicationFactory.CreateClient();
 
@@ -100,11 +102,11 @@ public class CityControllerTests
         );
 
         var responseString = await response.Content.ReadAsStringAsync();
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
-        var exception = new EntityExistsException(typeof(City), nameof(City.Name), city.Name);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -125,7 +127,7 @@ public class CityControllerTests
         );
 
         var responseString = await response.Content.ReadAsStringAsync();
-        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(newCityName, cityDto.Name);
@@ -141,6 +143,8 @@ public class CityControllerTests
         await _cityService.CreateAsync(city);
         await _cityService.CreateAsync(existingCity);
 
+        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), existingCity.Name).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.PutAsync("api/City/update", new StringContent(
@@ -148,32 +152,30 @@ public class CityControllerTests
                 new UpdateCityRequest { Id = city.Id, Name = existingCity.Name }
             ), Encoding.UTF8, "application/json")
         );
-
         var responseString = await response.Content.ReadAsStringAsync();
-
-        var exception = new EntityExistsException(typeof(City), nameof(City.Name), existingCity.Name);
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
     public async Task Update_ReturnsBadRequest_WhenCityNotExists()
     {
-        var httpClient = _applicationFactory.CreateClient();
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
 
+        var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.PutAsync("api/City/update", new StringContent(
             JsonSerializer.Serialize(
-                new UpdateCityRequest { Id = "NotExistingId", Name = "Name" }
+                new UpdateCityRequest { Id = id, Name = "Name" }
             ), Encoding.UTF8, "application/json")
         );
-
         var responseString = await response.Content.ReadAsStringAsync();
-
         var exception = new EntityNotFoundException(typeof(City), "NotExistingId");
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -195,14 +197,17 @@ public class CityControllerTests
     [Fact]
     public async Task Delete_ReturnsBadRequest_WhenCityNotExists()
     {
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.DeleteAsync($"api/City/delete?id=NotExistingId");
+        var response = await httpClient.DeleteAsync($"api/City/delete?id={id}");
         var responseString = await response.Content.ReadAsStringAsync();
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
-        var exception = new EntityNotFoundException(typeof(City), "NotExistingId");
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -213,7 +218,7 @@ public class CityControllerTests
 
         var list = _universityFaker.Generate(3);
 
-        foreach(var university in list)
+        foreach (var university in list)
         {
             university.CityId = city.Id;
             await _universityService.CreateAsync(university);
@@ -232,13 +237,17 @@ public class CityControllerTests
     [Fact]
     public async Task GetUniversities_ReturnsListOfUniversities_WhenCityNotExists()
     {
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.GetAsync($"api/City/universities?id=NotExistingId");
+        var response = await httpClient.GetAsync($"api/City/universities?id={id}");
         var responseString = await response.Content.ReadAsStringAsync();
 
-        var exception = new EntityNotFoundException(typeof(City), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 }

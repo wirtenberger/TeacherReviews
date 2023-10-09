@@ -19,7 +19,7 @@ public class CityRepository : ICityRepository
 
     public async Task<City> DeleteAsync(string id)
     {
-        var city = await GetByIdAsync(id);
+        var city = (await GetByIdAsync(id))!;
         CitiesSet.Remove(city);
         return city;
     }

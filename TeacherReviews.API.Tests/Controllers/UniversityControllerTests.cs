@@ -1,7 +1,7 @@
-﻿using Bogus;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using System.Text.Json;
+using Bogus;
 using TeacherReviews.API.Contracts.Requests.University;
 using TeacherReviews.API.Mapping;
 using TeacherReviews.API.Services;
@@ -16,17 +16,17 @@ public class UniversityControllerTests
 {
     private readonly ApplicationFactory _applicationFactory;
 
+    private readonly Faker<City> _cityFaker = Fakers.CityFaker;
+
     private readonly CityService _cityService;
 
-    private readonly UniversityService _universityService;
+    private readonly Faker<Teacher> _teacherFaker = Fakers.TeacherFaker;
 
     private readonly TeacherService _teacherService;
 
-    private readonly Faker<City> _cityFaker = Fakers.CityFaker;
-
     private readonly Faker<University> _universityFaker = Fakers.UniversityFaker;
 
-    private readonly Faker<Teacher> _teacherFaker = Fakers.TeacherFaker;
+    private readonly UniversityService _universityService;
 
 
     public UniversityControllerTests()
@@ -61,15 +61,17 @@ public class UniversityControllerTests
     [Fact]
     public async Task GetUniversityById_ReturnsBadRequest_WhenUniversityNotExists()
     {
-        var httpClient = _applicationFactory.CreateClient();
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(University), id).Serialize();
 
-        var response = await httpClient.GetAsync($"api/University/get?id=NotExistingId");
+        var httpClient = _applicationFactory.CreateClient();
+        var response = await httpClient.GetAsync("api/University/get?id=NotExistingId");
         var responseString = await response.Content.ReadAsStringAsync();
 
-        var exception = new EntityNotFoundException(typeof(University), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -91,7 +93,7 @@ public class UniversityControllerTests
         ));
 
         var responseString = await response.Content.ReadAsStringAsync();
-        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
 
         university.Id = universityDto.Id;
 
@@ -105,6 +107,8 @@ public class UniversityControllerTests
         var university = _universityFaker.Generate();
         university.CityId = "NotExistingId";
 
+        var expectedException = new EntityNotFoundException(typeof(City), university.CityId).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.PostAsync("api/University/create", new StringContent(
@@ -115,10 +119,10 @@ public class UniversityControllerTests
         ));
 
         var responseString = await response.Content.ReadAsStringAsync();
-        var exception = new EntityNotFoundException(typeof(City), university.CityId);
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -129,11 +133,11 @@ public class UniversityControllerTests
 
         var university = _universityFaker.Generate();
         university.CityId = city.Id;
-
         await _universityService.CreateAsync(university);
 
-        var httpClient = _applicationFactory.CreateClient();
+        var expectedException = new EntityExistsException(typeof(University), nameof(University.Name), university.Name).Serialize();
 
+        var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.PostAsync("api/University/create", new StringContent(
             JsonSerializer.Serialize(
                 new CreateUniversityRequest
@@ -145,10 +149,11 @@ public class UniversityControllerTests
 
         var responseString = await response.Content.ReadAsStringAsync();
 
-        var exception = new EntityExistsException(typeof(University), nameof(University.Name), university.Name);
+
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -180,7 +185,7 @@ public class UniversityControllerTests
         ));
 
         var responseString = await response.Content.ReadAsStringAsync();
-        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
 
         updateUniversity.Id = universityDto.Id;
 
@@ -193,13 +198,16 @@ public class UniversityControllerTests
     {
         var university = _universityFaker.Generate();
 
+        var notExistingId = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(University), notExistingId).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.PutAsync("api/University/update", new StringContent(
             JsonSerializer.Serialize(
                 new UpdateUniversityRequest
                 {
-                    Id = "NotExistingId",
+                    Id = notExistingId,
                     Name = university.Name,
                     Abbreviation = university.Abbreviation,
                     CityId = Guid.NewGuid().ToString(),
@@ -208,11 +216,10 @@ public class UniversityControllerTests
         ));
 
         var responseString = await response.Content.ReadAsStringAsync();
-
-        var exception = new EntityNotFoundException(typeof(University), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -225,6 +232,9 @@ public class UniversityControllerTests
         university.CityId = city.Id;
         await _universityService.CreateAsync(university);
 
+        var notExistingId = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(City), notExistingId).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.PutAsync("api/University/update", new StringContent(
@@ -234,17 +244,16 @@ public class UniversityControllerTests
                     Id = university.Id,
                     Name = university.Name,
                     Abbreviation = university.Abbreviation,
-                    CityId = "NotExistingId",
+                    CityId = notExistingId,
                 }, JsonDefaultOptions.SerializeOptions
             ), Encoding.UTF8, "application/json"
         ));
 
         var responseString = await response.Content.ReadAsStringAsync();
-
-        var exception = new EntityNotFoundException(typeof(City), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -261,8 +270,9 @@ public class UniversityControllerTests
         await _universityService.CreateAsync(university);
         await _universityService.CreateAsync(university2);
 
-        var httpClient = _applicationFactory.CreateClient();
+        var expectedException = new EntityExistsException(typeof(University), nameof(University.Name), university2.Name).Serialize();
 
+        var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.PutAsync("api/University/update", new StringContent(
             JsonSerializer.Serialize(
                 new UpdateUniversityRequest
@@ -274,13 +284,11 @@ public class UniversityControllerTests
                 }, JsonDefaultOptions.SerializeOptions
             ), Encoding.UTF8, "application/json"
         ));
-
         var responseString = await response.Content.ReadAsStringAsync();
-
-        var exception = new EntityExistsException(typeof(University), nameof(University.Name), university2.Name);
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -306,14 +314,16 @@ public class UniversityControllerTests
     [Fact]
     public async Task DeleteUniversity_ReturnsBadRequest_WhenUniversityNotExists()
     {
-        var httpClient = _applicationFactory.CreateClient();
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(University), id).Serialize();
 
-        var response = await httpClient.DeleteAsync($"api/University/delete?id=NotExistingId");
+        var httpClient = _applicationFactory.CreateClient();
+        var response = await httpClient.DeleteAsync($"api/University/delete?id={id}");
         var responseString = await response.Content.ReadAsStringAsync();
-        var exception = new EntityNotFoundException(typeof(University), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -340,14 +350,17 @@ public class UniversityControllerTests
     [Fact]
     public async Task GetUniversitysCity_ReturnsBadRequest_WhenUniversityNotExist()
     {
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(University), id).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.GetAsync($"api/University/getcity?id=NotExistingId");
+        var response = await httpClient.GetAsync($"api/University/getcity?id={id}");
         var responseString = await response.Content.ReadAsStringAsync();
-        var exception = new EntityNotFoundException(typeof(University), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 
     [Fact]
@@ -380,13 +393,16 @@ public class UniversityControllerTests
     [Fact]
     public async Task GetUniversitysTeachers_ReturnsBadRequest_WhenUniversityNotExist()
     {
+        var id = "NotExistingId";
+        var expectedException = new EntityNotFoundException(typeof(University), id).Serialize();
+
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.GetAsync($"api/University/getteachers?id=NotExistingId");
+        var response = await httpClient.GetAsync($"api/University/getteachers?id={id}");
         var responseString = await response.Content.ReadAsStringAsync();
-        var exception = new EntityNotFoundException(typeof(University), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equivalent(exception.Serialize(), responseString);
+        Assert.Equivalent(expectedException, exception);
     }
 }

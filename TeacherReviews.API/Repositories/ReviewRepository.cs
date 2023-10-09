@@ -41,7 +41,7 @@ public class ReviewRepository : IReviewRepository
     public async Task<Review> DeleteAsync(string id)
     {
         var review = await GetByIdAsync(id);
-        return ReviewsSet.Remove(review).Entity;
+        return ReviewsSet.Remove(review!).Entity;
     }
 
     public Task<Review> UpdateAsync(Review item)

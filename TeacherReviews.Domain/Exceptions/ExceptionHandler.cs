@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace TeacherReviews.Domain.Exceptions;
 
@@ -11,6 +12,8 @@ public static class ExceptionHandler
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = baseApiException.StatusCode;
 
-        await context.Response.WriteAsync(baseApiException.Serialize());
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(baseApiException.AsExceptionResponse())
+        );
     }
 }

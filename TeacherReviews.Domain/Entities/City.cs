@@ -3,7 +3,7 @@
 public class City
 {
     [Required]
-    public string Id { get; set; }
+    public string Id { get; set; } = default!;
 
     [Required]
     public string Name { get; set; } = default!;
