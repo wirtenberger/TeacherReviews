@@ -53,7 +53,7 @@ public class CityControllerTests
     public async Task GetCityById_ReturnsBadRequest_WhenNotExists()
     {
         var id = "NotExistingId";
-        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
+        var expectedException = new EntityNotFoundException(typeof(City), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
 
@@ -91,7 +91,7 @@ public class CityControllerTests
     {
         var city = _cityFaker.Generate();
         await _cityService.CreateAsync(city);
-        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), city.Name).Serialize();
+        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), city.Name).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
 
@@ -143,7 +143,7 @@ public class CityControllerTests
         await _cityService.CreateAsync(city);
         await _cityService.CreateAsync(existingCity);
 
-        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), existingCity.Name).Serialize();
+        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), existingCity.Name).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
 
@@ -163,7 +163,7 @@ public class CityControllerTests
     public async Task Update_ReturnsBadRequest_WhenCityNotExists()
     {
         var id = "NotExistingId";
-        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
+        var expectedException = new EntityNotFoundException(typeof(City), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.PutAsync("api/City/update", new StringContent(
@@ -198,7 +198,7 @@ public class CityControllerTests
     public async Task Delete_ReturnsBadRequest_WhenCityNotExists()
     {
         var id = "NotExistingId";
-        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
+        var expectedException = new EntityNotFoundException(typeof(City), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
 
@@ -238,7 +238,7 @@ public class CityControllerTests
     public async Task GetUniversities_ReturnsListOfUniversities_WhenCityNotExists()
     {
         var id = "NotExistingId";
-        var expectedException = new EntityNotFoundException(typeof(City), id).Serialize();
+        var expectedException = new EntityNotFoundException(typeof(City), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
 
