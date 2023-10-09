@@ -66,9 +66,16 @@ public class Program
 
         app.UseExceptionHandler();
 
-        if (!app.Environment.IsEnvironment("Test"))
+        if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
         {
             app.UseMiddleware<RequestTransactionMiddleware>();
+
+            using var scope = app.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            if (context.Database.GetPendingMigrations().Any())
+            {
+                context.Database.Migrate();
+            }
         }
 
         app.UseHttpsRedirection();
