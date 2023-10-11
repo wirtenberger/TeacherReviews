@@ -15,7 +15,7 @@ namespace TeacherReviews.API.Tests.Controllers;
 public class CityControllerTests
 {
     private readonly ApplicationFactory _applicationFactory;
-
+    
     private Faker<City> CityFaker => Fakers.CityFaker;
 
     private readonly CityService _cityService;
@@ -172,7 +172,7 @@ public class CityControllerTests
             ), Encoding.UTF8, "application/json")
         );
         var responseString = await response.Content.ReadAsStringAsync();
-        var exception = new EntityNotFoundException(typeof(City), "NotExistingId");
+        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
