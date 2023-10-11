@@ -16,11 +16,11 @@ public class CityControllerTests
 {
     private readonly ApplicationFactory _applicationFactory;
 
-    private readonly Faker<City> _cityFaker = Fakers.CityFaker;
+    private Faker<City> CityFaker => Fakers.CityFaker;
 
     private readonly CityService _cityService;
 
-    private readonly Faker<University> _universityFaker = Fakers.UniversityFaker;
+    private Faker<University> UniversityFaker => Fakers.UniversityFaker;
 
     private readonly UniversityService _universityService;
 
@@ -35,7 +35,7 @@ public class CityControllerTests
     [Fact]
     public async Task GetCityById_ReturnsCity_WhenExists()
     {
-        var city = _cityFaker.Generate();
+        var city = CityFaker.Generate();
 
         await _cityService.CreateAsync(city);
 
@@ -71,7 +71,7 @@ public class CityControllerTests
     {
         var httpClient = _applicationFactory.CreateClient();
 
-        var city = _cityFaker.Generate();
+        var city = CityFaker.Generate();
 
         var response = await httpClient.PostAsync("api/City/create", new StringContent(
             JsonSerializer.Serialize(
@@ -89,7 +89,7 @@ public class CityControllerTests
     [Fact]
     public async Task Create_ReturnsBadRequest_WhenCityWithSuchNameExists()
     {
-        var city = _cityFaker.Generate();
+        var city = CityFaker.Generate();
         await _cityService.CreateAsync(city);
         var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), city.Name).AsExceptionResponse();
 
@@ -112,7 +112,7 @@ public class CityControllerTests
     [Fact]
     public async Task Update_ReturnCity_WhenCityWithSuchNameNotExists()
     {
-        var city = _cityFaker.Generate();
+        var city = CityFaker.Generate();
         var newCityName = Fakers.Faker.Address.City();
 
         await _cityService.CreateAsync(city);
@@ -136,9 +136,9 @@ public class CityControllerTests
     [Fact]
     public async Task Update_ReturnBadRequest_WhenCityWithSuchNameExists()
     {
-        var city = _cityFaker.Generate();
+        var city = CityFaker.Generate();
 
-        var existingCity = _cityFaker.Generate();
+        var existingCity = CityFaker.Generate();
 
         await _cityService.CreateAsync(city);
         await _cityService.CreateAsync(existingCity);
@@ -181,7 +181,7 @@ public class CityControllerTests
     [Fact]
     public async Task Delete_ReturnsCity_WhenCityExists()
     {
-        var city = _cityFaker.Generate();
+        var city = CityFaker.Generate();
         await _cityService.CreateAsync(city);
 
         var httpClient = _applicationFactory.CreateClient();
@@ -213,19 +213,18 @@ public class CityControllerTests
     [Fact]
     public async Task GetUniversities_ReturnsListOfUniversities_WhenCityExists()
     {
-        var city = _cityFaker.Generate();
+        var city = CityFaker.Generate();
         await _cityService.CreateAsync(city);
 
-        var list = _universityFaker.Generate(3);
-
+        var list = UniversityFaker.Generate(3);
         foreach (var university in list)
         {
+            university.City = city;
             university.CityId = city.Id;
             await _universityService.CreateAsync(university);
         }
 
         var httpClient = _applicationFactory.CreateClient();
-
         var response = await httpClient.GetAsync($"api/City/universities?id={city.Id}");
         var responseString = await response.Content.ReadAsStringAsync();
         var universitiesDtoList = JsonSerializer.Deserialize<List<UniversityDto>>(responseString, JsonDefaultOptions.DeserializeOptions)!;
