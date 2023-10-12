@@ -1,6 +1,4 @@
 ﻿using System.Net;
-using System.Text;
-using System.Text.Json;
 using Bogus;
 using TeacherReviews.API.Contracts.Requests.University;
 using TeacherReviews.API.Mapping;
@@ -16,18 +14,15 @@ public class UniversityControllerTests
 {
     private readonly ApplicationFactory _applicationFactory;
 
-    private readonly Faker<City> _cityFaker = Fakers.CityFaker;
-
     private readonly CityService _cityService;
-
-    private readonly Faker<Teacher> _teacherFaker = Fakers.TeacherFaker;
 
     private readonly TeacherService _teacherService;
 
-    private readonly Faker<University> _universityFaker = Fakers.UniversityFaker;
-
     private readonly UniversityService _universityService;
 
+    private Faker<Teacher> TeacherFaker => Fakers.TeacherFaker;
+
+    private Faker<University> UniversityFaker => Fakers.UniversityFaker;
 
     public UniversityControllerTests()
     {
@@ -41,18 +36,14 @@ public class UniversityControllerTests
     [Fact]
     public async Task GetUniversityById_ReturnsUniversity_WhenUniversityExists()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
         await _universityService.CreateAsync(university);
 
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/University/get?id={university.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var universityDto = await response.Content.ReadFromJsonAsync<UniversityDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(university.ToDto(), universityDto);
@@ -66,9 +57,7 @@ public class UniversityControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.GetAsync("api/University/get?id=NotExistingId");
-        var responseString = await response.Content.ReadAsStringAsync();
-
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -77,25 +66,21 @@ public class UniversityControllerTests
     [Fact]
     public async Task CreateUniversity_ReturnsUniversity_WhenCityExistsAndUniversityWithSuchNameNotExists()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
 
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.PostAsync("api/University/create", new StringContent(
-            JsonSerializer.Serialize(
-                new CreateUniversityRequest { Name = university.Name, Abbreviation = university.Abbreviation, CityId = university.CityId },
-                JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
-
-        university.Id = universityDto.Id;
+        var response = await httpClient.PostAsJsonAsync("api/University/create",
+            new CreateUniversityRequest
+            {
+                Name = university.Name,
+                Abbreviation = university.Abbreviation,
+                CityId = university.CityId
+            }
+        );
+        var universityDto = await response.Content.ReadFromJsonAsync<UniversityDto>();
+        university.Id = universityDto!.Id;
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(university.ToDto(), universityDto);
@@ -104,22 +89,22 @@ public class UniversityControllerTests
     [Fact]
     public async Task CreateUniversity_ReturnsBadRequest_WhenCityNotExists()
     {
-        var university = _universityFaker.Generate();
+        var university = UniversityFaker.Generate();
         university.CityId = "NotExistingId";
 
         var expectedException = new EntityNotFoundException(typeof(City), university.CityId).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.PostAsync("api/University/create", new StringContent(
-            JsonSerializer.Serialize(
-                new CreateUniversityRequest { Name = university.Name, Abbreviation = university.Abbreviation, CityId = university.CityId },
-                JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var response = await httpClient.PostAsJsonAsync("api/University/create",
+            new CreateUniversityRequest
+            {
+                Name = university.Name,
+                Abbreviation = university.Abbreviation,
+                CityId = university.CityId
+            }
+        );
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -128,29 +113,24 @@ public class UniversityControllerTests
     [Fact]
     public async Task CreateUniversity_ReturnsBadRequest_WhenUniversityWithSuchNameExists()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
         await _universityService.CreateAsync(university);
 
-        var expectedException = new EntityExistsException(typeof(University), nameof(University.Name), university.Name).AsExceptionResponse();
+        var expectedException = new EntityExistsException(typeof(University), nameof(University.Name), university.Name)
+            .AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PostAsync("api/University/create", new StringContent(
-            JsonSerializer.Serialize(
-                new CreateUniversityRequest
-                {
-                    Name = university.Name, Abbreviation = university.Abbreviation, CityId = university.CityId,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
+        var response = await httpClient.PostAsJsonAsync("api/University/create",
+            new CreateUniversityRequest
+            {
+                Name = university.Name,
+                Abbreviation = university.Abbreviation,
+                CityId = university.CityId
+            }
+        );
 
-        var responseString = await response.Content.ReadAsStringAsync();
-
-
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -159,35 +139,24 @@ public class UniversityControllerTests
     [Fact]
     public async Task UpdateUniversity_ReturnsUniversity_WhenCityExistsAndUniversityWithSuchNameNotExists()
     {
-        var city = _cityFaker.Generate();
-        var city2 = _cityFaker.Generate();
-
-        await _cityService.CreateAsync(city);
-        await _cityService.CreateAsync(city2);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
-
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
         await _universityService.CreateAsync(university);
-
-        var updateUniversity = _universityFaker.Generate();
-        updateUniversity.CityId = city2.Id;
+        var updateUniversity = UniversityFaker.Generate();
+        await _cityService.CreateAsync(updateUniversity.City);
 
         var httpClient = _applicationFactory.CreateClient();
-
-        var response = await httpClient.PutAsync("api/University/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateUniversityRequest
-                {
-                    Id = university.Id, Name = updateUniversity.Name, Abbreviation = updateUniversity.Abbreviation, CityId = updateUniversity.CityId,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
-
-        updateUniversity.Id = universityDto.Id;
+        var response = await httpClient.PutAsJsonAsync("api/University/update",
+            new UpdateUniversityRequest
+            {
+                Id = university.Id,
+                Name = updateUniversity.Name,
+                Abbreviation = updateUniversity.Abbreviation,
+                CityId = updateUniversity.CityId
+            }
+        );
+        var universityDto = await response.Content.ReadFromJsonAsync<UniversityDto>();
+        updateUniversity.Id = universityDto!.Id;
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(updateUniversity.ToDto(), universityDto);
@@ -196,27 +165,23 @@ public class UniversityControllerTests
     [Fact]
     public async Task UpdateUniversity_ReturnsBadRequest_WhenUniversityNotExists()
     {
-        var university = _universityFaker.Generate();
+        var university = UniversityFaker.Generate();
 
         var notExistingId = "NotExistingId";
         var expectedException = new EntityNotFoundException(typeof(University), notExistingId).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
 
-        var response = await httpClient.PutAsync("api/University/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateUniversityRequest
-                {
-                    Id = notExistingId,
-                    Name = university.Name,
-                    Abbreviation = university.Abbreviation,
-                    CityId = Guid.NewGuid().ToString(),
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var response = await httpClient.PutAsJsonAsync("api/University/update",
+            new UpdateUniversityRequest
+            {
+                Id = notExistingId,
+                Name = university.Name,
+                Abbreviation = university.Abbreviation,
+                CityId = university.CityId
+            }
+        );
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -225,32 +190,23 @@ public class UniversityControllerTests
     [Fact]
     public async Task UpdateUniversity_ReturnsBadRequest_WhenCityNotExists()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
         await _universityService.CreateAsync(university);
 
         var notExistingId = "NotExistingId";
         var expectedException = new EntityNotFoundException(typeof(City), notExistingId).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-
-        var response = await httpClient.PutAsync("api/University/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateUniversityRequest
-                {
-                    Id = university.Id,
-                    Name = university.Name,
-                    Abbreviation = university.Abbreviation,
-                    CityId = notExistingId,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var response = await httpClient.PutAsJsonAsync("api/University/update",
+            new UpdateUniversityRequest
+            {
+                Id = university.Id,
+                Name = university.Name,
+                Abbreviation = university.Abbreviation,
+                CityId = notExistingId
+            });
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -259,33 +215,30 @@ public class UniversityControllerTests
     [Fact]
     public async Task UpdateUniversity_ReturnsBadRequest_WhenUniversityWithSuchNameExists()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
+        var university = UniversityFaker.Generate();
+        var university2 = UniversityFaker.Generate();
 
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
-        var university2 = _universityFaker.Generate();
-        university2.CityId = city.Id;
+        (university2.City, university2.CityId) = (university.City, university.CityId);
+
+        await _cityService.CreateAsync(university.City);
 
         await _universityService.CreateAsync(university);
         await _universityService.CreateAsync(university2);
 
-        var expectedException = new EntityExistsException(typeof(University), nameof(University.Name), university2.Name).AsExceptionResponse();
+        var expectedException = new EntityExistsException(typeof(University), nameof(University.Name), university2.Name)
+            .AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PutAsync("api/University/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateUniversityRequest
-                {
-                    Id = university.Id,
-                    Name = university2.Name,
-                    Abbreviation = university.Abbreviation,
-                    CityId = university.CityId,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var response = await httpClient.PutAsJsonAsync("api/University/update",
+            new UpdateUniversityRequest
+            {
+                Id = university.Id,
+                Name = university2.Name,
+                Abbreviation = university.Abbreviation,
+                CityId = university.CityId
+            });
+
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -294,18 +247,14 @@ public class UniversityControllerTests
     [Fact]
     public async Task DeleteUniversity_ReturnsUniversity_WhenUniversityExists()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
         await _universityService.CreateAsync(university);
 
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.DeleteAsync($"api/University/delete?id={university.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var universityDto = JsonSerializer.Deserialize<UniversityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var universityDto = await response.Content.ReadFromJsonAsync<UniversityDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(university.ToDto(), universityDto);
@@ -319,8 +268,7 @@ public class UniversityControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.DeleteAsync($"api/University/delete?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -329,22 +277,17 @@ public class UniversityControllerTests
     [Fact]
     public async Task GetUniversitysCity_ReturnsCity_WhenUniversityExist()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
-
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
         await _universityService.CreateAsync(university);
 
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/University/getcity?id={university.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var cityDto = await response.Content.ReadFromJsonAsync<CityDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equivalent(city.ToDto(), cityDto);
+        Assert.Equivalent(university.City.ToDto(), cityDto);
     }
 
     [Fact]
@@ -356,8 +299,7 @@ public class UniversityControllerTests
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/University/getcity?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -366,25 +308,21 @@ public class UniversityControllerTests
     [Fact]
     public async Task GetUniversitysTeachers_ReturnsListOfTeachers_WhenUniversityExist()
     {
-        var city = _cityFaker.Generate();
-        await _cityService.CreateAsync(city);
-
-        var university = _universityFaker.Generate();
-        university.CityId = city.Id;
+        var university = UniversityFaker.Generate();
+        await _cityService.CreateAsync(university.City);
         await _universityService.CreateAsync(university);
 
-        var teachers = _teacherFaker.Generate(3);
+        var teachers = TeacherFaker.Generate(3);
         foreach (var teacher in teachers)
         {
-            teacher.UniversityId = university.Id;
+            (teacher.University, teacher.UniversityId) = (university, university.Id);
             await _teacherService.CreateAsync(teacher);
         }
 
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/University/getteachers?id={university.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var teacherDtos = JsonSerializer.Deserialize<List<TeacherDto>>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var teacherDtos = await response.Content.ReadFromJsonAsync<List<TeacherDto>>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(teachers.Select(t => t.ToDto()).ToList(), teacherDtos);
@@ -399,8 +337,7 @@ public class UniversityControllerTests
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/University/getteachers?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
