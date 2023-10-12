@@ -1,6 +1,4 @@
 ﻿using System.Net;
-using System.Text;
-using System.Text.Json;
 using Bogus;
 using TeacherReviews.API.Contracts.Requests.City;
 using TeacherReviews.API.Mapping;
@@ -15,14 +13,14 @@ namespace TeacherReviews.API.Tests.Controllers;
 public class CityControllerTests
 {
     private readonly ApplicationFactory _applicationFactory;
-    
-    private Faker<City> CityFaker => Fakers.CityFaker;
 
     private readonly CityService _cityService;
 
-    private Faker<University> UniversityFaker => Fakers.UniversityFaker;
-
     private readonly UniversityService _universityService;
+
+    private Faker<City> CityFaker => Fakers.CityFaker;
+
+    private Faker<University> UniversityFaker => Fakers.UniversityFaker;
 
     public CityControllerTests()
     {
@@ -40,10 +38,8 @@ public class CityControllerTests
         await _cityService.CreateAsync(city);
 
         var httpClient = _applicationFactory.CreateClient();
-
         var response = await httpClient.GetAsync($"api/City/get?id={city.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var cityDto = await response.Content.ReadFromJsonAsync<CityDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(city.ToDto(), cityDto);
@@ -58,9 +54,7 @@ public class CityControllerTests
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/City/get?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -73,17 +67,16 @@ public class CityControllerTests
 
         var city = CityFaker.Generate();
 
-        var response = await httpClient.PostAsync("api/City/create", new StringContent(
-            JsonSerializer.Serialize(
-                new CreateCityRequest { Name = city.Name }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json")
+        var response = await httpClient.PostAsJsonAsync("api/City/create",
+            new CreateCityRequest
+            {
+                Name = city.Name
+            }
         );
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
+        var cityDto = await response.Content.ReadFromJsonAsync<CityDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equivalent(city.Name, cityDto.Name);
+        Assert.Equivalent(city.Name, cityDto!.Name);
     }
 
     [Fact]
@@ -91,19 +84,17 @@ public class CityControllerTests
     {
         var city = CityFaker.Generate();
         await _cityService.CreateAsync(city);
-        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), city.Name).AsExceptionResponse();
+        var expectedException =
+            new EntityExistsException(typeof(City), nameof(City.Name), city.Name).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-
-        var response = await httpClient.PostAsync("api/City/create", new StringContent(
-            JsonSerializer.Serialize(
-                new CreateCityRequest { Name = city.Name }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json")
+        var response = await httpClient.PostAsJsonAsync("api/City/create",
+            new CreateCityRequest
+            {
+                Name = city.Name
+            }
         );
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
-
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -114,46 +105,41 @@ public class CityControllerTests
     {
         var city = CityFaker.Generate();
         var newCityName = Fakers.Faker.Address.City();
-
         await _cityService.CreateAsync(city);
 
         var httpClient = _applicationFactory.CreateClient();
-
-
-        var response = await httpClient.PutAsync("api/City/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateCityRequest { Id = city.Id, Name = newCityName }
-            ), Encoding.UTF8, "application/json")
+        var response = await httpClient.PutAsJsonAsync("api/City/update",
+            new UpdateCityRequest
+            {
+                Id = city.Id,
+                Name = newCityName
+            }
         );
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
+        var cityDto = await response.Content.ReadFromJsonAsync<CityDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equivalent(newCityName, cityDto.Name);
+        Assert.Equivalent(newCityName, cityDto!.Name);
     }
 
     [Fact]
     public async Task Update_ReturnBadRequest_WhenCityWithSuchNameExists()
     {
         var city = CityFaker.Generate();
-
         var existingCity = CityFaker.Generate();
-
         await _cityService.CreateAsync(city);
         await _cityService.CreateAsync(existingCity);
-
-        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), existingCity.Name).AsExceptionResponse();
+        var expectedException = new EntityExistsException(typeof(City), nameof(City.Name), existingCity.Name)
+            .AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-
-        var response = await httpClient.PutAsync("api/City/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateCityRequest { Id = city.Id, Name = existingCity.Name }
-            ), Encoding.UTF8, "application/json")
+        var response = await httpClient.PutAsJsonAsync("api/City/update",
+            new UpdateCityRequest
+            {
+                Id = city.Id,
+                Name = existingCity.Name
+            }
         );
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -166,13 +152,14 @@ public class CityControllerTests
         var expectedException = new EntityNotFoundException(typeof(City), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PutAsync("api/City/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateCityRequest { Id = id, Name = "Name" }
-            ), Encoding.UTF8, "application/json")
+        var response = await httpClient.PutAsJsonAsync("api/City/update",
+            new UpdateCityRequest
+            {
+                Id = id,
+                Name = "Name"
+            }
         );
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -187,8 +174,7 @@ public class CityControllerTests
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.DeleteAsync($"api/City/delete?id={city.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var cityDto = JsonSerializer.Deserialize<CityDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var cityDto = await response.Content.ReadFromJsonAsync<CityDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(city.ToDto(), cityDto);
@@ -203,8 +189,7 @@ public class CityControllerTests
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.DeleteAsync($"api/City/delete?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -226,8 +211,7 @@ public class CityControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.GetAsync($"api/City/universities?id={city.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var universitiesDtoList = JsonSerializer.Deserialize<List<UniversityDto>>(responseString, JsonDefaultOptions.DeserializeOptions)!;
+        var universitiesDtoList = await response.Content.ReadFromJsonAsync<List<UniversityDto>>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(list.Select(u => u.ToDto()).ToList(), universitiesDtoList);
@@ -242,9 +226,7 @@ public class CityControllerTests
         var httpClient = _applicationFactory.CreateClient();
 
         var response = await httpClient.GetAsync($"api/City/universities?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);

@@ -1,6 +1,4 @@
 ﻿using System.Net;
-using System.Text;
-using System.Text.Json;
 using Bogus;
 using TeacherReviews.API.Contracts.Requests.Teacher;
 using TeacherReviews.API.Mapping;
@@ -16,21 +14,17 @@ public class TeacherControllerTests
 {
     private readonly ApplicationFactory _applicationFactory;
 
-    private Faker<City> CityFaker => Fakers.CityFaker;
-
     private readonly CityService _cityService;
 
-    private Faker<University> UniversityFaker => Fakers.UniversityFaker;
+    private readonly ReviewService _reviewService;
+
+    private readonly TeacherService _teacherService;
 
     private readonly UniversityService _universityService;
 
     private Faker<Teacher> TeacherFaker => Fakers.TeacherFaker;
 
-    private readonly TeacherService _teacherService;
-
     private Faker<Review> ReviewFaker => Fakers.ReviewFaker;
-
-    private readonly ReviewService _reviewService;
 
     public TeacherControllerTests()
     {
@@ -52,8 +46,7 @@ public class TeacherControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.GetAsync($"api/Teacher/get?id={teacher.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var teacherDto = JsonSerializer.Deserialize<TeacherDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var teacherDto = await response.Content.ReadFromJsonAsync<TeacherDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(teacher.ToDto(), teacherDto);
@@ -67,8 +60,7 @@ public class TeacherControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.GetAsync($"api/Teacher/get?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -82,21 +74,16 @@ public class TeacherControllerTests
         await _universityService.CreateAsync(teacher.University);
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PostAsync($"api/Teacher/create", new StringContent(
-            JsonSerializer.Serialize(
-                new CreateTeacherRequest
-                {
-                    Name = teacher.Name,
-                    Surname = teacher.Surname,
-                    Patronymic = teacher.Patronymic,
-                    UniversityId = teacher.UniversityId,
-                }
-            ), Encoding.UTF8, "application/json"
-        ));
-        var responseString = await response.Content.ReadAsStringAsync();
-        var teacherDto = JsonSerializer.Deserialize<TeacherDto>(responseString, JsonDefaultOptions.DeserializeOptions)!;
-
-        teacher.Id = teacherDto.Id;
+        var response = await httpClient.PostAsJsonAsync("api/Teacher/create",
+            new CreateTeacherRequest
+            {
+                Name = teacher.Name,
+                Surname = teacher.Surname,
+                Patronymic = teacher.Patronymic,
+                UniversityId = teacher.UniversityId
+            });
+        var teacherDto = await response.Content.ReadFromJsonAsync<TeacherDto>();
+        teacher.Id = teacherDto!.Id;
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(teacher.ToDto(), teacherDto);
@@ -110,19 +97,15 @@ public class TeacherControllerTests
         var expectedException = new EntityNotFoundException(typeof(University), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PostAsync($"api/Teacher/create", new StringContent(
-            JsonSerializer.Serialize(
-                new CreateTeacherRequest
-                {
-                    Name = teacher.Name,
-                    Surname = teacher.Surname,
-                    Patronymic = teacher.Patronymic,
-                    UniversityId = id,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions)!;
+        var response = await httpClient.PostAsJsonAsync("api/Teacher/create",
+            new CreateTeacherRequest
+            {
+                Name = teacher.Name,
+                Surname = teacher.Surname,
+                Patronymic = teacher.Patronymic,
+                UniversityId = id
+            });
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -144,20 +127,16 @@ public class TeacherControllerTests
         updateTeacher.Id = teacher.Id;
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PutAsync($"api/Teacher/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateTeacherRequest
-                {
-                    Id = updateTeacher.Id,
-                    Name = updateTeacher.Name,
-                    Surname = updateTeacher.Surname,
-                    Patronymic = updateTeacher.Patronymic,
-                    UniversityId = updateTeacher.UniversityId,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-        var responseString = await response.Content.ReadAsStringAsync();
-        var teacherDto = JsonSerializer.Deserialize<TeacherDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var response = await httpClient.PutAsJsonAsync("api/Teacher/update",
+            new UpdateTeacherRequest
+            {
+                Id = updateTeacher.Id,
+                Name = updateTeacher.Name,
+                Surname = updateTeacher.Surname,
+                Patronymic = updateTeacher.Patronymic,
+                UniversityId = updateTeacher.UniversityId
+            });
+        var teacherDto = await response.Content.ReadFromJsonAsync<TeacherDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(updateTeacher.ToDto(), teacherDto);
@@ -172,21 +151,16 @@ public class TeacherControllerTests
         var expectedException = new EntityNotFoundException(typeof(Teacher), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PutAsync($"api/Teacher/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateTeacherRequest
-                {
-                    Id = id,
-                    Name = teacher.Name,
-                    Surname = teacher.Surname,
-                    Patronymic = teacher.Patronymic,
-                    UniversityId = teacher.UniversityId,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var response = await httpClient.PutAsJsonAsync("api/Teacher/update",
+            new UpdateTeacherRequest
+            {
+                Id = id,
+                Name = teacher.Name,
+                Surname = teacher.Surname,
+                Patronymic = teacher.Patronymic,
+                UniversityId = teacher.UniversityId
+            });
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -204,21 +178,17 @@ public class TeacherControllerTests
         var expectedException = new EntityNotFoundException(typeof(University), id).AsExceptionResponse();
 
         var httpClient = _applicationFactory.CreateClient();
-        var response = await httpClient.PutAsync($"api/Teacher/update", new StringContent(
-            JsonSerializer.Serialize(
-                new UpdateTeacherRequest
-                {
-                    Id = teacher.Id,
-                    Name = teacher.Name,
-                    Surname = teacher.Surname,
-                    Patronymic = teacher.Patronymic,
-                    UniversityId = id,
-                }, JsonDefaultOptions.SerializeOptions
-            ), Encoding.UTF8, "application/json"
-        ));
+        var response = await httpClient.PutAsJsonAsync("api/Teacher/update",
+            new UpdateTeacherRequest
+            {
+                Id = teacher.Id,
+                Name = teacher.Name,
+                Surname = teacher.Surname,
+                Patronymic = teacher.Patronymic,
+                UniversityId = id
+            });
 
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -234,8 +204,7 @@ public class TeacherControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.DeleteAsync($"api/Teacher/delete?id={teacher.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var teacherDto = JsonSerializer.Deserialize<TeacherDto>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var teacherDto = await response.Content.ReadFromJsonAsync<TeacherDto>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(teacher.ToDto(), teacherDto);
@@ -249,8 +218,7 @@ public class TeacherControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.DeleteAsync($"api/Teacher/delete?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
@@ -274,8 +242,7 @@ public class TeacherControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.GetAsync($"api/Teacher/getreviews?id={teacher.Id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var reviewDtos = JsonSerializer.Deserialize<List<ReviewDto>>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var reviewDtos = await response.Content.ReadFromJsonAsync<List<ReviewDto>>();
 
         Assert.Equivalent(HttpStatusCode.OK, response.StatusCode);
         Assert.Equivalent(reviews.Select(r => r.ToDto()), reviewDtos);
@@ -289,8 +256,7 @@ public class TeacherControllerTests
 
         var httpClient = _applicationFactory.CreateClient();
         var response = await httpClient.GetAsync($"api/Teacher/getreviews?id={id}");
-        var responseString = await response.Content.ReadAsStringAsync();
-        var exception = JsonSerializer.Deserialize<ExceptionResponse>(responseString, JsonDefaultOptions.DeserializeOptions);
+        var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
         Assert.Equivalent(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equivalent(expectedException, exception);
