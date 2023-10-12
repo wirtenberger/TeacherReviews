@@ -25,4 +25,12 @@ public static class Fakers
                                                          .RuleFor(t => t.Patronymic, faker => faker.Name.Random.String2(4, 8))
                                                          .RuleFor(t => t.University, _ => UniversityFaker.Generate())
                                                          .RuleFor(t => t.UniversityId, (_, t) => t.University.Id);
+
+    public static Faker<Review> ReviewFaker { get; } = new Faker<Review>()
+                                                       .RuleFor(r => r.Id, _ => Guid.NewGuid().ToString())
+                                                       .RuleFor(r => r.Rate, f => f.Random.Int(0, 6))
+                                                       .RuleFor(r => r.Teacher, (_, r) => TeacherFaker.Generate())
+                                                       .RuleFor(r => r.TeacherId, (_, r) => r.Teacher.Id)
+                                                       .RuleFor(r => r.Text, f => f.Random.String2(10, 255))
+                                                       .RuleFor(r => r.CreateDate, f => f.Date.BetweenDateOnly(DateOnly.MinValue, DateOnly.MaxValue));
 }
