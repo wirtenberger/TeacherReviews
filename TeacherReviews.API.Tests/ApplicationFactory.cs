@@ -65,6 +65,6 @@ public class ApplicationFactory : WebApplicationFactory<Program>
 
         var authHeaderValue = Convert.ToBase64String("AbsolutelyUnpredictableUsername:MegaPassword"u8.ToArray());
 
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BasicAuthentication.AuthSchemeName, authHeaderValue);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(BasicAuthentication.SchemeName, authHeaderValue);
     }
 }
