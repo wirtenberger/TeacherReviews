@@ -84,7 +84,7 @@ public static class BasicAuthenticationExtension
                 opts.RequireClaim("password");
             });
 
-            opts.DefaultPolicy = opts.GetPolicy(BasicAuthentication.SchemeName);
+            opts.DefaultPolicy = opts.GetPolicy(BasicAuthentication.SchemeName)!;
         });
     }
 }

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeacherReviews.API.Authentication;
 using TeacherReviews.API.Contracts.Repositories;
 using TeacherReviews.API.Middlewares;
@@ -61,8 +60,6 @@ public class Program
             options.DefaultAuthenticateScheme = BasicAuthentication.SchemeName;
             options.DefaultScheme = BasicAuthentication.SchemeName;
         }).AddBasicAuth();
-
-        
 
 
         builder.Services.AddScoped<ICityRepository, CityRepository>();
