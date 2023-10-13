@@ -10,12 +10,12 @@ public class UniversityRepository : IUniversityRepository
 {
     private readonly ApplicationDbContext _context;
 
+    private DbSet<University> UniversitiesSet => _context.Universities;
+
     public UniversityRepository(ApplicationDbContext context)
     {
         _context = context;
     }
-
-    private DbSet<University> UniversitiesSet => _context.Universities;
 
     public async Task<University> DeleteAsync(string id)
     {

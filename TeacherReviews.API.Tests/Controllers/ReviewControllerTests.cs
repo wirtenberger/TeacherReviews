@@ -47,7 +47,7 @@ public class ReviewControllerTests
         {
             TeacherId = review.TeacherId,
             Rate = review.Rate,
-            Text = review.Text
+            Text = review.Text,
         });
         var reviewDto = await response.Content.ReadFromJsonAsync<ReviewDto>();
 
@@ -68,7 +68,7 @@ public class ReviewControllerTests
         {
             TeacherId = review.TeacherId,
             Rate = review.Rate,
-            Text = review.Text
+            Text = review.Text,
         });
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 

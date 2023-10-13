@@ -5,6 +5,8 @@ namespace TeacherReviews.Domain;
 
 public class UsersDbContext : DbContext
 {
+    public DbSet<AdminUser> AdminUsers { get; set; } = default!;
+
     public UsersDbContext(DbContextOptions<UsersDbContext> options) : base(options)
     {
     }
@@ -15,6 +17,4 @@ public class UsersDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(UsersDbContext).Assembly);
     }
-
-    public DbSet<AdminUser> AdminUsers { get; set; } = default!;
 }

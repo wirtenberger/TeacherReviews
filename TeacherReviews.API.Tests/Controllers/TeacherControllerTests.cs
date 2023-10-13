@@ -80,7 +80,7 @@ public class TeacherControllerTests
                 Name = teacher.Name,
                 Surname = teacher.Surname,
                 Patronymic = teacher.Patronymic,
-                UniversityId = teacher.UniversityId
+                UniversityId = teacher.UniversityId,
             });
         var teacherDto = await response.Content.ReadFromJsonAsync<TeacherDto>();
         teacher.Id = teacherDto!.Id;
@@ -103,7 +103,7 @@ public class TeacherControllerTests
                 Name = teacher.Name,
                 Surname = teacher.Surname,
                 Patronymic = teacher.Patronymic,
-                UniversityId = id
+                UniversityId = id,
             });
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
@@ -134,7 +134,7 @@ public class TeacherControllerTests
                 Name = updateTeacher.Name,
                 Surname = updateTeacher.Surname,
                 Patronymic = updateTeacher.Patronymic,
-                UniversityId = updateTeacher.UniversityId
+                UniversityId = updateTeacher.UniversityId,
             });
         var teacherDto = await response.Content.ReadFromJsonAsync<TeacherDto>();
 
@@ -158,7 +158,7 @@ public class TeacherControllerTests
                 Name = teacher.Name,
                 Surname = teacher.Surname,
                 Patronymic = teacher.Patronymic,
-                UniversityId = teacher.UniversityId
+                UniversityId = teacher.UniversityId,
             });
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
@@ -185,7 +185,7 @@ public class TeacherControllerTests
                 Name = teacher.Name,
                 Surname = teacher.Surname,
                 Patronymic = teacher.Patronymic,
-                UniversityId = id
+                UniversityId = id,
             });
 
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();

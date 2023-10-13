@@ -10,9 +10,9 @@ public class AdminUserService
 {
     private readonly IAdminUserRepository _adminUserRepository;
 
-    private readonly PasswordHasher<AdminUser> _passwordHasher = new();
-
     private readonly IConfiguration _configuration;
+
+    private readonly PasswordHasher<AdminUser> _passwordHasher = new();
 
     public AdminUserService(IAdminUserRepository adminUserRepository, IConfiguration configuration)
     {
