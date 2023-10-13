@@ -12,6 +12,10 @@ COPY . .
 WORKDIR "/src/TeacherReviews.API"
 RUN dotnet build "TeacherReviews.API.csproj" -c Release -o /app/build
 
+WORKDIR "/src/"
+RUN dotnet test
+
+WORKDIR "/src/TeacherReviews.API"
 FROM build AS publish
 RUN dotnet publish "TeacherReviews.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
