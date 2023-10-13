@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TeacherReviews.API.Contracts.Requests.University;
 using TeacherReviews.API.Mapping;
 using TeacherReviews.API.Services;
@@ -35,6 +36,7 @@ public class UniversityController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +49,7 @@ public class UniversityController : ControllerBase
         return Ok(createdUniversity.ToDto());
     }
 
+    [Authorize]
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,6 +62,7 @@ public class UniversityController : ControllerBase
         return Ok(updatedUniversity.ToDto());
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

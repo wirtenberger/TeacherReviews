@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TeacherReviews.API.Contracts.Requests.City;
 using TeacherReviews.API.Mapping;
 using TeacherReviews.API.Services;
@@ -33,6 +34,7 @@ public class CityController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpPost("create")]
     public async Task<IActionResult> CreateCity([FromBody] CreateCityRequest createCityRequest)
     {
@@ -43,6 +45,7 @@ public class CityController : ControllerBase
         return Ok(createdCity.ToDto());
     }
 
+    [Authorize]
     [HttpPut("update")]
     public async Task<IActionResult> UpdateCity([FromBody] UpdateCityRequest updateCityRequest)
     {
@@ -53,6 +56,7 @@ public class CityController : ControllerBase
         return Ok(updatedCity.ToDto());
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteCity([FromQuery] DeleteCityRequest deleteCityRequest)
     {
