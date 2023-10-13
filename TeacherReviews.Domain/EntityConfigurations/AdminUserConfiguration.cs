@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TeacherReviews.Domain.Entities;
 
-namespace TeacherReviews.Domain.Configuration;
+namespace TeacherReviews.Domain.EntityConfigurations;
 
 public class AdminUserConfiguration : IEntityTypeConfiguration<AdminUser>
 {
