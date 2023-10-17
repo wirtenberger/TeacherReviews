@@ -10,5 +10,4 @@ public interface IUniversityRepository
     Task<University> AddAsync(University item);
     Task<University> DeleteAsync(string id);
     Task<University> UpdateAsync(University item);
-    Task<bool> ExistsAsync(string id);
 }

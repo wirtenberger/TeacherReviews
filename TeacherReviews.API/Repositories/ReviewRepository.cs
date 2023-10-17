@@ -48,9 +48,4 @@ public class ReviewRepository : IReviewRepository
     {
         return Task.FromResult(ReviewsSet.Update(item).Entity);
     }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-        return await ReviewsSet.AsNoTrackingWithIdentityResolution().AnyAsync(r => r.Id == id);
-    }
 }

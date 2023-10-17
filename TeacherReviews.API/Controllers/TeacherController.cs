@@ -11,10 +11,12 @@ namespace TeacherReviews.API.Controllers;
 public class TeacherController : ControllerBase
 {
     private readonly TeacherService _teacherService;
+    private readonly ReviewService _reviewService;
 
-    public TeacherController(TeacherService teacherService)
+    public TeacherController(TeacherService teacherService, ReviewService reviewService)
     {
         _teacherService = teacherService;
+        _reviewService = reviewService;
     }
 
     [HttpGet("getall")]
@@ -81,9 +83,9 @@ public class TeacherController : ControllerBase
         var teacher = await _teacherService.GetByIdAsync(
             getTeachersReviewsRequest.Id
         );
-
+        var reviews = await _reviewService.GetAllAsync(r => r.TeacherId == teacher.Id);
         return Ok(
-            teacher.Reviews.Select(r => r.ToDto())
+            reviews.Select(r => r.ToDto())
         );
     }
 }

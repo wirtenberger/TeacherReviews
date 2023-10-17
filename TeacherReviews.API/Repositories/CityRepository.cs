@@ -50,9 +50,4 @@ public class CityRepository : ICityRepository
         await CitiesSet.AddAsync(item);
         return item;
     }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-        return await CitiesSet.AsNoTrackingWithIdentityResolution().AnyAsync(c => c.Id == id);
-    }
 }

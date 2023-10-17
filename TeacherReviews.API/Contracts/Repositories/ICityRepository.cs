@@ -10,5 +10,4 @@ public interface ICityRepository
     Task<City> AddAsync(City item);
     Task<City> DeleteAsync(string id);
     Task<City> UpdateAsync(City item);
-    Task<bool> ExistsAsync(string id);
 }

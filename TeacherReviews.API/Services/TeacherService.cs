@@ -39,7 +39,7 @@ public class TeacherService
 
     public async Task<Teacher> CreateAsync(Teacher item)
     {
-        if (!await _universityRepository.ExistsAsync(item.UniversityId))
+        if (await _universityRepository.GetByIdAsync(item.UniversityId) is null)
         {
             throw new EntityNotFoundException(typeof(University), item.UniversityId);
         }
@@ -51,7 +51,7 @@ public class TeacherService
 
     public async Task<Teacher> DeleteAsync(string id)
     {
-        if (!await _teacherRepository.ExistsAsync(id))
+        if (await _teacherRepository.GetByIdAsync(id) is null)
         {
             throw new EntityNotFoundException(typeof(Teacher), id);
         }
@@ -63,12 +63,12 @@ public class TeacherService
 
     public async Task<Teacher> UpdateAsync(Teacher item)
     {
-        if (!await _teacherRepository.ExistsAsync(item.Id))
+        if (await _teacherRepository.GetByIdAsync(item.Id) is null)
         {
             throw new EntityNotFoundException(typeof(Teacher), item.Id);
         }
 
-        if (!await _universityRepository.ExistsAsync(item.UniversityId))
+        if (await _universityRepository.GetByIdAsync(item.UniversityId) is null)
         {
             throw new EntityNotFoundException(typeof(University), item.UniversityId);
         }

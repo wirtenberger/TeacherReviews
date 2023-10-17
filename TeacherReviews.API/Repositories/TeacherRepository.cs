@@ -50,9 +50,4 @@ public class TeacherRepository : ITeacherRepository
         await TeachersSet.AddAsync(item);
         return item;
     }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-        return await TeachersSet.AsNoTrackingWithIdentityResolution().AnyAsync(t => t.Id == id);
-    }
 }
