@@ -6,6 +6,10 @@ public class BaseApiException : Exception
 {
     public const int DefaultCode = StatusCodes.Status500InternalServerError;
 
+    protected List<string> Errors { get; set; }
+
+    public int StatusCode { get; set; }
+
     protected BaseApiException(int statusCode, string description) : this(
         statusCode,
         new List<string> { description }
@@ -22,10 +26,6 @@ public class BaseApiException : Exception
         StatusCode = statusCode;
         Errors = description;
     }
-
-    protected List<string> Errors { get; set; }
-
-    public int StatusCode { get; set; }
 
     public ExceptionResponse AsExceptionResponse()
     {

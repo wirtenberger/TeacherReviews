@@ -10,12 +10,12 @@ public class TeacherRepository : ITeacherRepository
 {
     private readonly ApplicationDbContext _context;
 
+    private DbSet<Teacher> TeachersSet => _context.Teachers;
+
     public TeacherRepository(ApplicationDbContext context)
     {
         _context = context;
     }
-
-    private DbSet<Teacher> TeachersSet => _context.Teachers;
 
     public async Task<Teacher> DeleteAsync(string id)
     {

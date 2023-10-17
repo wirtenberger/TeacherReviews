@@ -70,7 +70,7 @@ public class CityControllerTests
         var response = await httpClient.PostAsJsonAsync("api/City/create",
             new CreateCityRequest
             {
-                Name = city.Name
+                Name = city.Name,
             }
         );
         var cityDto = await response.Content.ReadFromJsonAsync<CityDto>();
@@ -91,7 +91,7 @@ public class CityControllerTests
         var response = await httpClient.PostAsJsonAsync("api/City/create",
             new CreateCityRequest
             {
-                Name = city.Name
+                Name = city.Name,
             }
         );
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
@@ -112,7 +112,7 @@ public class CityControllerTests
             new UpdateCityRequest
             {
                 Id = city.Id,
-                Name = newCityName
+                Name = newCityName,
             }
         );
         var cityDto = await response.Content.ReadFromJsonAsync<CityDto>();
@@ -136,7 +136,7 @@ public class CityControllerTests
             new UpdateCityRequest
             {
                 Id = city.Id,
-                Name = existingCity.Name
+                Name = existingCity.Name,
             }
         );
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
@@ -156,7 +156,7 @@ public class CityControllerTests
             new UpdateCityRequest
             {
                 Id = id,
-                Name = "Name"
+                Name = "Name",
             }
         );
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();

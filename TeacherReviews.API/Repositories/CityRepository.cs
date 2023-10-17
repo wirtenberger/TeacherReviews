@@ -10,12 +10,12 @@ public class CityRepository : ICityRepository
 {
     private readonly ApplicationDbContext _context;
 
+    private DbSet<City> CitiesSet => _context.Cities;
+
     public CityRepository(ApplicationDbContext context)
     {
         _context = context;
     }
-
-    private DbSet<City> CitiesSet => _context.Cities;
 
     public async Task<City> DeleteAsync(string id)
     {
