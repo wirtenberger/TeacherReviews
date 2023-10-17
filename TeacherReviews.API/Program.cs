@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TeacherReviews.API.Authentication;
 using TeacherReviews.API.Contracts.Repositories;
 using TeacherReviews.API.Middlewares;
 using TeacherReviews.API.Repositories;
@@ -20,8 +21,17 @@ public class Program
             options =>
             {
                 options
-                    .UseLazyLoadingProxies()
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
                     .UseNpgsql(builder.Configuration.GetConnectionString("DefaultDbConnection"));
+            }
+        );
+
+        builder.Services.AddDbContext<UsersDbContext>(
+            options =>
+            {
+                options
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                    .UseNpgsql(builder.Configuration.GetConnectionString("UsersDbConnection"));
             }
         );
 
@@ -45,15 +55,24 @@ public class Program
             };
         });
 
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = BasicAuthentication.SchemeName;
+            options.DefaultScheme = BasicAuthentication.SchemeName;
+        }).AddBasicAuth();
+
+
         builder.Services.AddScoped<ICityRepository, CityRepository>();
         builder.Services.AddScoped<IUniversityRepository, UniversityRepository>();
         builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
         builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+        builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
 
         builder.Services.AddScoped<CityService>();
         builder.Services.AddScoped<UniversityService>();
         builder.Services.AddScoped<TeacherService>();
         builder.Services.AddScoped<ReviewService>();
+        builder.Services.AddScoped<AdminUserService>();
         builder.Services.AddScoped<UnitOfWork>();
 
         var app = builder.Build();
@@ -66,13 +85,27 @@ public class Program
 
         app.UseExceptionHandler();
 
-        if (!app.Environment.IsEnvironment("Test"))
+        if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
         {
             app.UseMiddleware<RequestTransactionMiddleware>();
+
+            using var scope = app.Services.CreateScope();
+            var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            if (applicationDbContext.Database.GetPendingMigrations().Any())
+            {
+                applicationDbContext.Database.Migrate();
+            }
+
+            var usersDbContext = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
+            if (usersDbContext.Database.GetPendingMigrations().Any())
+            {
+                usersDbContext.Database.Migrate();
+            }
         }
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

@@ -10,12 +10,12 @@ public class ReviewRepository : IReviewRepository
 {
     private readonly ApplicationDbContext _context;
 
+    private DbSet<Review> ReviewsSet => _context.Reviews;
+
     public ReviewRepository(ApplicationDbContext context)
     {
         _context = context;
     }
-
-    private DbSet<Review> ReviewsSet => _context.Reviews;
 
     public async Task<Review?> GetByIdAsync(string id)
     {
@@ -47,10 +47,5 @@ public class ReviewRepository : IReviewRepository
     public Task<Review> UpdateAsync(Review item)
     {
         return Task.FromResult(ReviewsSet.Update(item).Entity);
-    }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-        return await ReviewsSet.AsNoTrackingWithIdentityResolution().AnyAsync(r => r.Id == id);
     }
 }

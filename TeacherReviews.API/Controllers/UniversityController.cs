@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TeacherReviews.API.Contracts.Requests.University;
 using TeacherReviews.API.Mapping;
 using TeacherReviews.API.Services;
@@ -9,11 +10,15 @@ namespace TeacherReviews.API.Controllers;
 [ApiController]
 public class UniversityController : ControllerBase
 {
+    private readonly CityService _cityService;
     private readonly UniversityService _universityService;
+    private readonly TeacherService _teacherService;
 
-    public UniversityController(UniversityService universityService)
+    public UniversityController(UniversityService universityService, TeacherService teacherService, CityService cityService)
     {
         _universityService = universityService;
+        _teacherService = teacherService;
+        _cityService = cityService;
     }
 
     [HttpGet("getall")]
@@ -35,6 +40,7 @@ public class UniversityController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +53,7 @@ public class UniversityController : ControllerBase
         return Ok(createdUniversity.ToDto());
     }
 
+    [Authorize]
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,6 +66,7 @@ public class UniversityController : ControllerBase
         return Ok(updatedUniversity.ToDto());
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,8 +85,9 @@ public class UniversityController : ControllerBase
     public async Task<IActionResult> GetCity([FromQuery] GetUniversitysCityRequest universitysCityRequest)
     {
         var university = await _universityService.GetByIdAsync(universitysCityRequest.Id);
+        var city = await _cityService.GetByIdAsync(university.CityId);
         return Ok(
-            university.City.ToDto()
+            city.ToDto()
         );
     }
 
@@ -88,8 +97,9 @@ public class UniversityController : ControllerBase
     public async Task<IActionResult> GetTeachers([FromQuery] GetUniversitysTeachers universitysCityRequest)
     {
         var university = await _universityService.GetByIdAsync(universitysCityRequest.Id);
+        var teachers = await _teacherService.GetAllAsync(t => t.UniversityId == university.Id);
         return Ok(
-            university.Teachers.Select(t => t.ToDto())
+            teachers.Select(t => t.ToDto())
         );
     }
 }

@@ -10,12 +10,12 @@ public class TeacherRepository : ITeacherRepository
 {
     private readonly ApplicationDbContext _context;
 
+    private DbSet<Teacher> TeachersSet => _context.Teachers;
+
     public TeacherRepository(ApplicationDbContext context)
     {
         _context = context;
     }
-
-    private DbSet<Teacher> TeachersSet => _context.Teachers;
 
     public async Task<Teacher> DeleteAsync(string id)
     {
@@ -49,10 +49,5 @@ public class TeacherRepository : ITeacherRepository
     {
         await TeachersSet.AddAsync(item);
         return item;
-    }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-        return await TeachersSet.AsNoTrackingWithIdentityResolution().AnyAsync(t => t.Id == id);
     }
 }

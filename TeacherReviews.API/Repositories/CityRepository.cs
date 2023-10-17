@@ -10,12 +10,12 @@ public class CityRepository : ICityRepository
 {
     private readonly ApplicationDbContext _context;
 
+    private DbSet<City> CitiesSet => _context.Cities;
+
     public CityRepository(ApplicationDbContext context)
     {
         _context = context;
     }
-
-    private DbSet<City> CitiesSet => _context.Cities;
 
     public async Task<City> DeleteAsync(string id)
     {
@@ -49,10 +49,5 @@ public class CityRepository : ICityRepository
     {
         await CitiesSet.AddAsync(item);
         return item;
-    }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-        return await CitiesSet.AsNoTrackingWithIdentityResolution().AnyAsync(c => c.Id == id);
     }
 }

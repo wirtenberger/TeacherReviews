@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TeacherReviews.API.Contracts.Requests.Teacher;
 using TeacherReviews.API.Mapping;
 using TeacherReviews.API.Services;
@@ -10,10 +11,12 @@ namespace TeacherReviews.API.Controllers;
 public class TeacherController : ControllerBase
 {
     private readonly TeacherService _teacherService;
+    private readonly ReviewService _reviewService;
 
-    public TeacherController(TeacherService teacherService)
+    public TeacherController(TeacherService teacherService, ReviewService reviewService)
     {
         _teacherService = teacherService;
+        _reviewService = reviewService;
     }
 
     [HttpGet("getall")]
@@ -35,6 +38,7 @@ public class TeacherController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +51,7 @@ public class TeacherController : ControllerBase
         return Ok(createdTeacher.ToDto());
     }
 
+    [Authorize]
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -58,6 +63,7 @@ public class TeacherController : ControllerBase
         return Ok(updatedTeacher.ToDto());
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,9 +83,9 @@ public class TeacherController : ControllerBase
         var teacher = await _teacherService.GetByIdAsync(
             getTeachersReviewsRequest.Id
         );
-
+        var reviews = await _reviewService.GetAllAsync(r => r.TeacherId == teacher.Id);
         return Ok(
-            teacher.Reviews.Select(r => r.ToDto())
+            reviews.Select(r => r.ToDto())
         );
     }
 }

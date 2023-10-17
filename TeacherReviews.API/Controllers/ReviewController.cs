@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TeacherReviews.API.Contracts.Requests.Review;
 using TeacherReviews.API.Mapping;
 using TeacherReviews.API.Services;
@@ -24,6 +25,7 @@ public class ReviewController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateReviewRequest createTeacherRequest)
     {
@@ -32,6 +34,7 @@ public class ReviewController : ControllerBase
         );
     }
 
+    [Authorize]
     [HttpDelete("delete")]
     public async Task<IActionResult> Delete([FromQuery] DeleteReviewRequest deleteReviewRequest)
     {
