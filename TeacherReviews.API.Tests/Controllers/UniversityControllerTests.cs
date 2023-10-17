@@ -76,7 +76,7 @@ public class UniversityControllerTests
             {
                 Name = university.Name,
                 Abbreviation = university.Abbreviation,
-                CityId = university.CityId
+                CityId = university.CityId,
             }
         );
         var universityDto = await response.Content.ReadFromJsonAsync<UniversityDto>();
@@ -101,7 +101,7 @@ public class UniversityControllerTests
             {
                 Name = university.Name,
                 Abbreviation = university.Abbreviation,
-                CityId = university.CityId
+                CityId = university.CityId,
             }
         );
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
@@ -126,7 +126,7 @@ public class UniversityControllerTests
             {
                 Name = university.Name,
                 Abbreviation = university.Abbreviation,
-                CityId = university.CityId
+                CityId = university.CityId,
             }
         );
 
@@ -152,7 +152,7 @@ public class UniversityControllerTests
                 Id = university.Id,
                 Name = updateUniversity.Name,
                 Abbreviation = updateUniversity.Abbreviation,
-                CityId = updateUniversity.CityId
+                CityId = updateUniversity.CityId,
             }
         );
         var universityDto = await response.Content.ReadFromJsonAsync<UniversityDto>();
@@ -178,7 +178,7 @@ public class UniversityControllerTests
                 Id = notExistingId,
                 Name = university.Name,
                 Abbreviation = university.Abbreviation,
-                CityId = university.CityId
+                CityId = university.CityId,
             }
         );
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
@@ -204,7 +204,7 @@ public class UniversityControllerTests
                 Id = university.Id,
                 Name = university.Name,
                 Abbreviation = university.Abbreviation,
-                CityId = notExistingId
+                CityId = notExistingId,
             });
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
 
@@ -235,7 +235,7 @@ public class UniversityControllerTests
                 Id = university.Id,
                 Name = university2.Name,
                 Abbreviation = university.Abbreviation,
-                CityId = university.CityId
+                CityId = university.CityId,
             });
 
         var exception = await response.Content.ReadFromJsonAsync<ExceptionResponse>();
