@@ -50,9 +50,4 @@ public class UniversityRepository : IUniversityRepository
         await UniversitiesSet.AddAsync(item);
         return item;
     }
-
-    public async Task<bool> ExistsAsync(string id)
-    {
-        return await UniversitiesSet.AsNoTrackingWithIdentityResolution().AnyAsync(u => u.Id == id);
-    }
 }

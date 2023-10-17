@@ -21,7 +21,7 @@ public class Program
             options =>
             {
                 options
-                    .UseLazyLoadingProxies()
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
                     .UseNpgsql(builder.Configuration.GetConnectionString("DefaultDbConnection"));
             }
         );

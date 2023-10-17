@@ -43,18 +43,17 @@ public class ApplicationFactory : WebApplicationFactory<Program>
 
             services.AddDbContext<ApplicationDbContext>(opts =>
             {
-                opts.UseLazyLoadingProxies();
-                opts.UseInMemoryDatabase("db");
+                opts
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                    .UseInMemoryDatabase("db");
             });
 
-            services.AddDbContext<UsersDbContext>(
-                options =>
-                {
-                    options
-                        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-                        .UseInMemoryDatabase("usersdb");
-                }
-            );
+            services.AddDbContext<UsersDbContext>(options =>
+            {
+                options
+                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                    .UseInMemoryDatabase("usersdb");
+            });
         });
         builder.UseEnvironment("Test");
     }

@@ -26,7 +26,7 @@ public class ReviewService
 
     public async Task<Review> CreateAsync(Review item)
     {
-        if (!await _teacherRepository.ExistsAsync(item.TeacherId))
+        if (await _teacherRepository.GetByIdAsync(item.TeacherId) is null)
         {
             throw new EntityNotFoundException(typeof(Teacher), item.TeacherId);
         }
@@ -38,7 +38,7 @@ public class ReviewService
 
     public async Task<Review> DeleteAsync(string id)
     {
-        if (!await _reviewRepository.ExistsAsync(id))
+        if (await _reviewRepository.GetByIdAsync(id) is null)
         {
             throw new EntityNotFoundException(typeof(Review), id);
         }

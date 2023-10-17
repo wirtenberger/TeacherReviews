@@ -10,5 +10,4 @@ public interface ITeacherRepository
     Task<Teacher> AddAsync(Teacher item);
     Task<Teacher> DeleteAsync(string id);
     Task<Teacher> UpdateAsync(Teacher item);
-    Task<bool> ExistsAsync(string id);
 }

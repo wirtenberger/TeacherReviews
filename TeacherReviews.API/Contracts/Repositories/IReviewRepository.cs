@@ -10,5 +10,4 @@ public interface IReviewRepository
     Task<Review> AddAsync(Review item);
     Task<Review> DeleteAsync(string id);
     Task<Review> UpdateAsync(Review item);
-    Task<bool> ExistsAsync(string id);
 }

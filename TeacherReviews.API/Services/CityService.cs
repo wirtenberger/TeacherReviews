@@ -52,7 +52,7 @@ public class CityService
 
     public async Task<City> DeleteAsync(string id)
     {
-        if (!await _cityRepository.ExistsAsync(id))
+        if (await _cityRepository.GetByIdAsync(id) is null)
         {
             throw new EntityNotFoundException(typeof(City), id);
         }
@@ -66,7 +66,7 @@ public class CityService
 
     public async Task<City> UpdateAsync(City item)
     {
-        if (!await _cityRepository.ExistsAsync(item.Id))
+        if (await _cityRepository.GetByIdAsync(item.Id) is null)
         {
             throw new EntityNotFoundException(typeof(City), item.Id);
         }
@@ -85,7 +85,7 @@ public class CityService
 
     public async Task<IEnumerable<University>> GetCitysUniversitiesAsync(string id)
     {
-        if (!await _cityRepository.ExistsAsync(id))
+        if (await _cityRepository.GetByIdAsync(id) is null)
         {
             throw new EntityNotFoundException(typeof(City), id);
         }
